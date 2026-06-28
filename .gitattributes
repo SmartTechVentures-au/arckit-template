@@ -1,0 +1,27 @@
+# Normalise all text files to LF on commit, regardless of OS or git config.
+# This prevents the "351 changed files" CRLF explosion on Windows/WSL checkouts.
+* text=auto eol=lf
+
+# Explicitly binary — never touch line endings
+*.png  binary
+*.jpg  binary
+*.jpeg binary
+*.gif  binary
+*.ico  binary
+*.pdf  binary
+*.zip  binary
+*.gz   binary
+*.tar  binary
+*.woff binary
+*.woff2 binary
+*.ttf  binary
+*.eot  binary
+*.docx binary
+*.pptx binary
+*.xlsx binary
+*.doc  binary
+*.xls  binary
+*.crdownload binary
+
+# Treat everything in external/ as binary — mixed file types, not normalised
+projects/*/external/* binary

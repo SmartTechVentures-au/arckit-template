@@ -1,0 +1,50 @@
+{
+  "name": "ArcKit",
+  "build": {
+    "dockerfile": "Dockerfile",
+    "context": ".."
+  },
+  "workspaceMount": "source=${localWorkspaceFolder},target=/workspaces/arckit,type=bind",
+  "workspaceFolder": "/workspaces/arckit",
+  "features": {
+    "ghcr.io/devcontainers/features/git:1": {},
+    "ghcr.io/devcontainers/features/github-cli:1": {}
+  },
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "ms-python.python",
+        "ms-python.vscode-pylance",
+        "ms-python.debugpy",
+        "charliermarsh.ruff",
+        "GitHub.copilot",
+        "GitHub.copilot-chat",
+        "ms-vsts.team",
+        "marp-team.marp-vscode",
+        "anthropic.claude-code",
+        "bierner.markdown-mermaid",
+        "MermaidChart.vscode-mermaid-chart"
+      ],
+      "settings": {
+        "python.defaultInterpreterPath": "/usr/local/bin/python",
+        "python.testing.pytestEnabled": false,
+        "[python]": {
+          "editor.defaultFormatter": "charliermarsh.ruff",
+          "editor.formatOnSave": true
+        }
+      }
+    }
+  },
+  "postCreateCommand": "bash .devcontainer/post-create.sh",
+  "forwardPorts": [8080],
+  "remoteUser": "vscode",
+  "containerEnv": {
+    "WORKSPACE_DIR": "${containerWorkspaceFolder}",
+    "OPENAI_API_KEY": "${localEnv:OPENAI_API_KEY}",
+    "ANTHROPIC_API_KEY": "${localEnv:ANTHROPIC_API_KEY}",
+    "GIT_USERNAME": "${localEnv:GIT_USERNAME:}",
+    "GIT_EMAIL": "${localEnv:GIT_EMAIL:}",
+    "AZDO_USERNAME": "${localEnv:AZDO_USERNAME:}",
+    "AZDO_PAT": "${localEnv:AZDO_PAT:}"
+  }
+}

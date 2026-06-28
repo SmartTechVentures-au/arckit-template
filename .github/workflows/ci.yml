@@ -1,0 +1,60 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  lint:
+    name: Lint & validate
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install Ruff
+        run: pip install ruff
+
+      - name: Ruff lint
+        run: ruff check scripts/
+
+      - name: Ruff format check
+        run: ruff format --check scripts/
+
+      - name: ShellCheck
+        run: |
+          shopt -s nullglob
+          shellcheck scripts/*.sh .devcontainer/*.sh
+
+      - name: Validate JSON
+        run: |
+          python -m json.tool package.json > /dev/null
+          python -m json.tool .devcontainer/devcontainer.json > /dev/null
+          echo "JSON files are valid."
+
+  docker-build:
+    name: Build dev container image
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: .devcontainer/Dockerfile
+          push: false
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
