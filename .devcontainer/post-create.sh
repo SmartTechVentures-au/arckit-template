@@ -195,9 +195,6 @@ echo "Installing ArcKit Claude plugins..."
 claude plugin marketplace add https://github.com/tractorjuice/arc-kit.git \
   || echo "Warning: arckit plugin marketplace add failed — continuing."
 
-claude plugin install arckit \
-  || echo "Warning: arckit plugin install failed — continuing without it."
-
 # arckit-au installs disabled by default, so install then enable it explicitly.
 claude plugin install arckit-au \
   && claude plugin enable arckit-au@arc-kit \
