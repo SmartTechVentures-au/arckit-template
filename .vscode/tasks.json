@@ -1,0 +1,11 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Serve",
+      "type": "shell",
+      "command": "/workspaces/arckit/scripts/serve.sh",
+      "problemMatcher": []
+    }
+  ]
+}

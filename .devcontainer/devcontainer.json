@@ -23,7 +23,9 @@
         "marp-team.marp-vscode",
         "anthropic.claude-code",
         "bierner.markdown-mermaid",
-        "MermaidChart.vscode-mermaid-chart"
+        "MermaidChart.vscode-mermaid-chart",
+        "JohnSutray.run-npm-buttons",
+        "spmeesseman.vscode-task-buttons"
       ],
       "settings": {
         "python.defaultInterpreterPath": "/usr/local/bin/python",
