@@ -167,13 +167,21 @@ ALIASES
 }
 
 add_env_loader_to_bashrc() {
-  if ! grep -qF "Source project .env" "$bashrc" 2>/dev/null; then
-    cat >> "$bashrc" <<'ENVLOAD'
+  # Older versions of this script wrote the block from a quoted heredoc, so a
+  # literal "$env_file" (undefined at shell startup) landed in .bashrc and the
+  # project .env was never sourced. Strip any such block before rewriting.
+  if grep -qF 'if [ -f "$env_file" ]; then' "$bashrc" 2>/dev/null; then
+    sed -i '/^# Source project .env if it exists$/,/^fi$/d' "$bashrc"
+  fi
+
+  if ! grep -qF "$env_file" "$bashrc" 2>/dev/null; then
+    # Unquoted heredoc: $env_file is expanded now, to an absolute path.
+    cat >> "$bashrc" <<ENVLOAD
 
 # Source project .env if it exists
 if [ -f "$env_file" ]; then
   set -a
-  source "$env_file"
+  . "$env_file"
   set +a
 fi
 ENVLOAD
@@ -190,20 +198,28 @@ source_project_env() {
 }
 
 install_claude_cli() {
-  if ! command -v claude >/dev/null 2>&1; then
-    curl -fsSL https://claude.ai/install.sh -o /tmp/claude-install.sh
-    bash /tmp/claude-install.sh
+  if command -v claude >/dev/null 2>&1; then
+    echo "Claude CLI already present ($(claude --version 2>/dev/null || echo unknown)) — skipping install."
+    return
   fi
+
+  curl -fsSL https://claude.ai/install.sh -o /tmp/claude-install.sh
+  bash /tmp/claude-install.sh
 
   command -v claude >/dev/null 2>&1 || {
     echo "ERROR: claude not found after install"
     exit 1
   }
-
-  claude install latest || echo "Warning: claude install latest failed — continuing."
 }
 
 install_arckit_plugins() {
+  # The image already installs these. Re-running a marketplace add on every
+  # container create is slow and fails noisily when offline.
+  if claude plugin list 2>/dev/null | grep -q "arckit"; then
+    echo "ArcKit plugins already installed — skipping."
+    return
+  fi
+
   echo "Installing ArcKit Claude plugins..."
 
   claude plugin marketplace add https://github.com/tractorjuice/arc-kit.git || \
@@ -221,7 +237,7 @@ add_git_aliases_to_bashrc
 add_env_loader_to_bashrc
 source_project_env
 
-echo "Installing Claude CLI..."
+echo "Checking Claude CLI..."
 install_claude_cli
 install_arckit_plugins
 

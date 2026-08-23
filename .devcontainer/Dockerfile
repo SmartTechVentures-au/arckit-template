@@ -1,5 +1,7 @@
 FROM mcr.microsoft.com/devcontainers/python:3.12
 
+ENV DEBIAN_FRONTEND=noninteractive
+
 RUN apt-get update && apt-get install -y --no-install-recommends \
     git \
     curl \
@@ -8,7 +10,6 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential \
     nodejs \
     npm \
-    docker.io \
     bubblewrap \
     graphviz \
     && rm -rf /var/lib/apt/lists/*
@@ -24,13 +25,13 @@ RUN mkdir -p -m 755 /etc/apt/keyrings \
     && apt-get update && apt-get install -y --no-install-recommends gh \
     && rm -rf /var/lib/apt/lists/*
 
-RUN curl -sL https://aka.ms/InstallAzureCLIDeb | bash
+RUN curl -fsSL https://aka.ms/InstallAzureCLIDeb | bash \
+    && rm -rf /var/lib/apt/lists/*
 
 RUN npm install -g @marp-team/marp-cli
 
 RUN python -m pip install --upgrade pip setuptools wheel uv
 
-# Pin ArcKit to an immutable commit for reproducible builds.
 RUN uv pip install --system \
       black \
       pylint \
@@ -41,7 +42,7 @@ RUN uv pip install --system \
       click \
       data-flow-diagram
 
-RUN git config --system --add safe.directory /workspaces/chorus
+RUN git config --system --add safe.directory /workspaces/arckit
 
 ENV PATH="/home/vscode/.local/bin:${PATH}"
 
