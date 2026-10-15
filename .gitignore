@@ -28,3 +28,12 @@ docs/telemetry.json
 
 .vscode/settings.json
 
+# Local environments, tool state, and generated Cursor commands
+.env.*
+!.env.example
+.codex/
+.cursor/commands/
+.venv/
+__pycache__/
+.pytest_cache/
+.ruff_cache/

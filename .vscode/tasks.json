@@ -4,7 +4,13 @@
     {
       "label": "Serve",
       "type": "shell",
-      "command": "/workspaces/arckit/scripts/serve.sh",
+      "command": "bash",
+      "args": [
+        "${workspaceFolder}/scripts/serve.sh"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
       "problemMatcher": []
     }
   ]

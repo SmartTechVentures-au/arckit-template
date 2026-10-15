@@ -19,26 +19,31 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: "3.12"
+          python-version: "3.13"
 
       - name: Install Ruff
-        run: pip install ruff
+        run: pip install ruff==0.17.0
 
       - name: Ruff lint
-        run: ruff check scripts/
+        run: ruff check scripts/ .devcontainer/ tests/
 
       - name: Ruff format check
-        run: ruff format --check scripts/
+        run: ruff format --check scripts/ .devcontainer/ tests/
 
       - name: ShellCheck
         run: |
           shopt -s nullglob
-          shellcheck scripts/*.sh .devcontainer/*.sh
+          shellcheck scripts/*.sh .devcontainer/*.sh tests/*.sh
+
+      - name: Provisioning regression tests
+        run: python -m unittest discover -s tests -v
 
       - name: Validate JSON
         run: |
           python -m json.tool package.json > /dev/null
           python -m json.tool .devcontainer/devcontainer.json > /dev/null
+          python -m json.tool .devcontainer/devcontainer-lock.json > /dev/null
+          python -m json.tool .vscode/tasks.json > /dev/null
           echo "JSON files are valid."
 
   docker-build:
@@ -56,5 +61,10 @@ jobs:
           context: .
           file: .devcontainer/Dockerfile
           push: false
+          load: true
+          tags: arckit-template:test
           cache-from: type=gha
           cache-to: type=gha,mode=max
+
+      - name: Verify tools, all shell environments, and docs server
+        run: bash tests/container-smoke.sh arckit-template:test

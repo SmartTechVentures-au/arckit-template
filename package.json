@@ -1,6 +1,6 @@
 {
   "scripts": {
-    "serve": "python scripts/server.py",
+    "serve": "python3 scripts/serve.py",
     "yolo": "claude --dangerously-skip-permissions"
   }
 }

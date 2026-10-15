@@ -1,82 +1,128 @@
 # ArcKit Workspace Template
 
-A ready-to-use **GitHub template** that spins up a VS Code Dev Container with
-[Claude Code](https://claude.com/claude-code) and [ArcKit](https://arckit.org/)
-pre-installed.
+A VS Code Dev Container with **Claude Code, Codex, and Cursor Agent CLI**,
+Python 3.13, Node 22, GitHub CLI, Azure CLI, `uv`, Ruff, pytest, ShellCheck,
+Graphviz, Marp, and Markdownlint. All three AI CLIs are installed in the image
+and verified as the `vscode` user; an editor extension is not required to use them.
 
-ArcKit is an AI harness that wraps your AI coding assistant — it gates, traces,
-and provenance-stamps everything the assistant produces, generating audit-ready
-architecture and governance artifacts.
-
-> Use this repo to start a new ArcKit project in minutes: click **Use this
-> template**, open it in a container, and start running ArcKit commands in
-> Claude Code.
-
-## What's included
-
-- **Dev Container** (Python 3.12) with Git, Node, `uv`, `ruff`, `pytest`,
-  `pylint`, and the [Marp](https://marp.app/) CLI for slide decks.
-- **Claude Code** installed and updated to the latest version (ArcKit needs
-  `v2.1.172+`).
-- **ArcKit plugins** installed from the
-  [`tractorjuice/arc-kit`](https://github.com/tractorjuice/arc-kit) marketplace:
-  the core `arckit` plugin plus the `arckit-au` (Australian government) overlay.
-- A small static **docs server** (`npm run serve` → http://localhost:8080).
-- VS Code extensions for Python, Ruff, Copilot, Claude Code, Marp, and Mermaid.
-
-## Prerequisites
-
-- [Docker Desktop](https://www.docker.com/products/docker-desktop/)
-- [VS Code](https://code.visualstudio.com/) with the
-  [Dev Containers](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers)
-  extension — **or** [GitHub Codespaces](https://github.com/features/codespaces).
-- An **Anthropic API key** (and optionally an OpenAI key).
+The container configures the Claude Code and Codex VS Code extensions, plus
+Python, Markdown, Mermaid, draw.io, YAML, TOML, and formatting extensions.
+Cursor Agent runs as `agent` (or `cursor-agent`) in the terminal. The Cursor
+editor itself runs on your host; this template does not install a third-party
+Cursor extension or replace the editor's `cursor` command.
 
 ## Getting started
 
-1. Click **Use this template → Create a new repository**, then clone it.
-2. Copy the env template and fill in your values:
+1. Create a repository from this template and clone it. Install Docker and
+   VS Code's Dev Containers extension, or use a Codespace.
+2. **Before opening the container**, create your local environment file:
    ```bash
    cp .env.example .env
    ```
-3. Provide your API keys. They are read from your **host environment** and
-   forwarded into the container (see [`devcontainer.json`](.devcontainer/devcontainer.json)).
-   Export them before launching VS Code:
-   ```bash
-   export ANTHROPIC_API_KEY=sk-ant-...
-   export OPENAI_API_KEY=sk-...        # optional
-   export GIT_USERNAME="Your Name"     # optional
-   export GIT_EMAIL="you@example.com"  # optional
-   ```
-4. Open the folder in VS Code and choose **Reopen in Container**. The
-   `post-create` step installs Claude Code and the ArcKit plugins automatically.
-5. Start Claude Code and run an ArcKit command:
-   ```bash
-   claude
-   ```
-   Then try `/arckit` commands inside the session.
+   Keep an existing `.env` when upgrading. Optional keys and Git identity are
+   documented in `.env.example`; account login is also available for each CLI.
+   An absent `.env` causes container creation to fail with a missing-file error.
+   For a Codespace, create `.env` through its recovery container and rebuild.
+3. Choose **Dev Containers: Reopen in Container**. The first build downloads
+   the pinned CLI releases. Post-create configures Git and installs the optional
+   ArcKit plugins. No personal credentials are needed to build the image.
+4. Run `claude`, `codex`, or `agent` and follow that tool's sign-in prompts.
+   API-key environment variables and account login are separate authentication
+   methods; in Codex, follow its API-key login flow if using `OPENAI_API_KEY`.
+5. Run `npm run serve` or the **Serve** task, then open the forwarded port 8080.
 
-## Useful commands
+## Environment in every shell
 
-| Command          | What it does                                         |
-| ---------------- | ---------------------------------------------------- |
-| `npm run serve`  | Serve the workspace as static docs on port `8080`.   |
-| `npm run yolo`   | Launch Claude Code with permission prompts skipped.  |
-| `bash scripts/claude.sh` | Manually (re)install Claude Code + ArcKit plugins. |
+The root `.env` is passed to Docker using `--env-file`. Variables are present
+before lifecycle scripts, the editor server, tasks, debuggers, or terminals
+start. Independent `docker exec` processes inherit them too, including Bash,
+Zsh, and POSIX `sh`, in interactive, login, and non-interactive modes.
+Applications that explicitly filter or clear their environment can still
+remove variables (for example `env -i`, `sudo`, or agent-specific policies).
 
-## Configuration
+Use Docker env-file syntax:
 
-- **`.env.example`** — copy to `.env`; documents the supported variables.
-  `.env` is gitignored and must **never** be committed.
-- **`.devcontainer/`** — `Dockerfile`, `devcontainer.json`, and the
-  `post-create` / `post-start` scripts.
-- **`scripts/`** — helper scripts (static server, env loader, Claude installer).
+```dotenv
+GIT_USERNAME=Your Name
+GIT_EMAIL=you@example.com
+ARCKIT_PROFILE=development
+```
 
-## Security
+Do not use `export`, quote values, or use shell substitutions such as `$HOME`
+or `$(command)`: Docker treats values literally. Blank assignments explicitly
+set an empty value; leave optional variables commented out instead. This file
+is not sourced as shell code, and host variables are not implicitly forwarded.
+Put the values you want in `.env`; there are no competing API-key overrides in
+`containerEnv` or `.bashrc`.
 
-This is a template — keep secrets out of it. `.env` is gitignored; only
-`.env.example` (with placeholder values) is tracked. Never commit real API keys
-or personal access tokens.
+**After changing `.env`, run Dev Containers: Rebuild Container.** An existing
+container or a newly opened terminal does not reload Docker's environment.
+The obsolete `scripts/load-env.sh` has been removed to prevent a second parser
+from interpreting the same values differently.
+
+When migrating: remove quotes/`export` from existing `.env` entries, replace
+`GIT_PAT` with `GH_TOKEN`, and recreate the container. Git's GitHub helper uses
+`GH_TOKEN` (or `GITHUB_TOKEN`) without copying the token into a credential file.
+`AZURE_DEVOPS_EXT_PAT` is for Azure DevOps CLI; Git authentication for Azure
+DevOps continues to use your forwarded credential helper.
+
+## ArcKit plugins and Cursor commands
+
+Post-create installs `arckit@arc-kit` and `arckit-au@arc-kit` for Claude,
+checking each plugin separately, and `arckit-codex@arckit` for Codex. The Codex
+repository is `tractorjuice/arckit-codex`; its marketplace is named `arckit`.
+Optional plugin failures are reported and do not hide a missing required CLI.
+Retry plugin installation with:
+
+```bash
+bash .devcontainer/install-plugins.sh
+```
+
+The compatibility command `bash scripts/claude.sh` invokes the same installer.
+Post-start verifies all three CLIs, reapplies Git configuration, and resyncs
+Cursor commands without requiring a marketplace download on every restart.
+
+Cursor commands are generated in `.cursor/commands/` from the Claude marketplace.
+Project commands in `.arckit/plugin-arckit/commands/` override the Australian
+pack, which overrides core commands. The synchroniser tracks only its own
+symlinks; hand-authored commands, user replacements, and unrelated symlinks
+are preserved. Generated files are gitignored. Cursor command availability
+depends on the optional Claude marketplace being installed successfully.
+
+## Authentication and rebuilds
+
+CLI sign-in state belongs to the container user's home, not the repository.
+It survives stop/start but **is not guaranteed to survive a rebuild**. Sign in
+again after rebuilding, or supply your own per-workspace persistent mounts for
+the documented credential directories of the tools you use. Do not bake login
+state into the image or commit it. This template deliberately does not share
+one credential volume between unrelated projects. API keys in the host `.env`
+are injected again when the container is recreated.
+
+## Maintenance and validation
+
+Core tool versions are Dockerfile build arguments. Node has one installation;
+there is no duplicate Node feature. Claude, Codex, Cursor, Marp, Markdownlint,
+Ruff, and uv have explicit version defaults. Upgrades should update those pins
+and run the checks below. OS packages, remaining Python dependencies, and ArcKit
+marketplaces still follow their upstream releases; this is not a fully locked
+image. Native tools may also offer runtime updates. Prefer a rebuild to reset
+the tools to the reviewed image versions.
+
+```bash
+python3 -m unittest discover -s tests -v
+ruff check scripts/ .devcontainer/ tests/
+ruff format --check scripts/ .devcontainer/ tests/
+shellcheck scripts/*.sh .devcontainer/*.sh tests/*.sh
+docker build -t arckit-template:test -f .devcontainer/Dockerfile .
+bash tests/container-smoke.sh arckit-template:test
+```
+
+CI runs these checks. Smoke tests use dummy values, exercise independent shells
+and CLI availability, check Git identity, and start the docs server. The server
+rejects hidden files (including `.env` and `.git`) and escaping symlinks.
+`.dockerignore` excludes local secrets, authentication state, and caches from
+the build context. Keep `.env` out of Git; only `.env.example` is committed.
 
 ## License
 

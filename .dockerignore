@@ -1,0 +1,16 @@
+.git
+.env
+.env.*
+!.env.example
+.claude
+.codex
+.cursor
+.venv
+node_modules
+__pycache__
+.pytest_cache
+.ruff_cache
+output
+exports
+*.pem
+*.key

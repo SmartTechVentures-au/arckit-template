@@ -1,3 +1,6 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
 # Add Oh My Zsh git plugin aliases to ~/.bashrc
 if ! grep -q "# Oh My Zsh git plugin aliases" ~/.bashrc 2>/dev/null; then
   cat >> ~/.bashrc <<'OMZGIT'
@@ -125,5 +128,3 @@ alias gwtmv='git worktree move'
 alias gwtrm='git worktree remove'
 OMZGIT
 fi
-
-export PATH="$HOME/.local/bin:$HOME/.claude/local:$PATH"

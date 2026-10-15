@@ -4,16 +4,10 @@
     "dockerfile": "Dockerfile",
     "context": ".."
   },
-  "workspaceMount": "source=${localWorkspaceFolder},target=/workspaces/arckit,type=bind",
-  "workspaceFolder": "/workspaces/arckit",
-  // gh and az are installed as Dockerfile layers, so no feature for them here.
-  "features": {
-    "ghcr.io/devcontainers/features/git:1": {}
-  },
+  "workspaceMount": "source=${localWorkspaceFolder},target=/workspaces/${localWorkspaceFolderBasename},type=bind",
+  "workspaceFolder": "/workspaces/${localWorkspaceFolderBasename}",
   "customizations": {
     "vscode": {
-      // GitHub.copilot / GitHub.copilot-chat are built into VS Code and must
-      // not be listed: doing so triggers a downgrade attempt that fails.
       "extensions": [
         "ms-python.python",
         "ms-python.vscode-pylance",
@@ -23,7 +17,17 @@
         "anthropic.claude-code",
         "bierner.markdown-mermaid",
         "MermaidChart.vscode-mermaid-chart",
-        "JohnSutray.run-npm-buttons"
+        "JohnSutray.run-npm-buttons",
+        "openai.chatgpt",
+        "DavidAnson.vscode-markdownlint",
+        "hediet.vscode-drawio",
+        "eamodio.gitlens",
+        "esbenp.prettier-vscode",
+        "timonwong.shellcheck",
+        "redhat.vscode-yaml",
+        "tamasfe.even-better-toml",
+        "editorconfig.editorconfig",
+        "yzhang.markdown-all-in-one"
       ],
       "settings": {
         "python.defaultInterpreterPath": "/usr/local/bin/python",
@@ -31,20 +35,23 @@
         "[python]": {
           "editor.defaultFormatter": "charliermarsh.ruff",
           "editor.formatOnSave": true
-        }
+        },
+        "terminal.integrated.defaultProfile.linux": "bash",
+        "terminal.integrated.inheritEnv": true
       }
     }
   },
   "postCreateCommand": "bash .devcontainer/post-create.sh",
-  "forwardPorts": [8080],
+  "forwardPorts": [
+    8080
+  ],
   "remoteUser": "vscode",
   "containerEnv": {
-    "WORKSPACE_DIR": "${containerWorkspaceFolder}",
-    "OPENAI_API_KEY": "${localEnv:OPENAI_API_KEY}",
-    "ANTHROPIC_API_KEY": "${localEnv:ANTHROPIC_API_KEY}",
-    "GIT_USERNAME": "${localEnv:GIT_USERNAME}",
-    "GIT_EMAIL": "${localEnv:GIT_EMAIL}",
-    "AZDO_USERNAME": "${localEnv:AZDO_USERNAME}",
-    "AZDO_PAT": "${localEnv:AZDO_PAT}"
-  }
+    "WORKSPACE_DIR": "${containerWorkspaceFolder}"
+  },
+  "runArgs": [
+    "--env-file",
+    "${localWorkspaceFolder}/.env"
+  ],
+  "postStartCommand": "bash .devcontainer/post-start.sh"
 }
